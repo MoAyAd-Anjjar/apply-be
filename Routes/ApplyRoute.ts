@@ -10,10 +10,7 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     const newUser: IInitializeState = req.body;
 
-    // Set the 'applied' property to true if it exists
-    if (newUser) {
-      newUser.applied = "applied";
-    }
+    
 
 
 
@@ -67,14 +64,22 @@ router.get('/:id', async (req: Request, res: Response) => {
 
 router.put('/:id', async (req: Request, res: Response) => {
   const userid = req.params.id;
-  const updatedData = req.body; // Assuming the update fields are coming from the request body
-
+  const {applied,status} = req.body; // Assuming the update fields are coming from the request body
+ console.log(applied,status);
+ console.log(userid);
   try {
-    // Update user information based on userID
-    const result = await UserInfo.updateOne(
-      { userID: userid }, // Filter condition
-      { $set: updatedData } // Update operation, setting new values
-    );
+      const user = await UserInfo.findOne({ userID: userid });
+  if (!user) {
+    console.log("User not found");
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const result = await UserInfo.updateOne(
+    { userID: userid }, 
+    { $set: { applied: applied, status: status } }
+  );
+  console.log(result); // Log the result to check modifiedCount and other details
+  
 
     // Check if the user was updated
     if (result.modifiedCount > 0) {
